@@ -1,0 +1,23 @@
+Ako zelis kiosk unutar postojece Angular aplikacije (membership-rfid-app/frontend),
+kopiraj ova dva fajla/foldera:
+
+  src/app/kiosk/kiosk.component.ts + .html + .css
+  src/app/services/demo-parking.service.ts
+
+U POSTOJECEM src/main.ts:
+
+  import { KioskComponent } from './app/kiosk/kiosk.component';
+
+U routes dodaj PRE wildcard '**':
+
+  { path: 'kiosk', component: KioskComponent },
+
+Zatim otvori http://localhost:4200/kiosk.
+
+VAZNO: Postojeci AppComponent prikazuje bocni admin meni kada je korisnik
+ulogovan. Ako zelis fullscreen kiosk ekran BEZ admin menija, promeni
+app.component.html/template da za '/kiosk' prikaze samo <router-outlet>,
+ili deployuj ovaj Kiosk projekat kao poseban Angular Static Site.
+
+Kiosk u ovoj verziji radi u potpunosti bez backend API-ja i bez JWT-a.
+Ne koristi ga za pravu naplatu ili javni ekran bez dodatne bezbednosti.
