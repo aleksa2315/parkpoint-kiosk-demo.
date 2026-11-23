@@ -1,0 +1,132 @@
+<div class="kiosk-app">
+  <header class="kiosk-header">
+    <div class="brand-lockup">
+      <div class="brand-symbol" aria-hidden="true">P<span class="brand-dot"></span></div>
+      <div class="brand-copy"><strong>ParkPoint</strong><span>SELF-SERVICE KIOSK</span></div>
+    </div>
+    <div class="header-right">
+      <div class="demo-tag"><span class="live-dot"></span> DEMO REŽIM</div>
+      <div class="header-clock"><strong>{{clock | date:'HH:mm'}}</strong><span>{{clock | date:'dd.MM.yyyy'}}</span></div>
+    </div>
+  </header>
+
+  <main class="kiosk-main">
+    <section class="welcome-panel" aria-label="Informacije o parkingu">
+      <div class="welcome-inner">
+        <div class="eyebrow"><span class="eyebrow-line"></span> JEDNOSTAVNO PARKIRANJE</div>
+        <h1>Vaš parking.<br><em>Bez čekanja.</em></h1>
+        <p class="hero-description">Pronađite vozilo prema registarskoj oznaci i proverite stanje parkinga u nekoliko dodira.</p>
+        <div class="hero-illustration" aria-hidden="true">
+          <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+          <div class="illustration-base">
+            <svg viewBox="0 0 500 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustracija automobila">
+              <defs><linearGradient id="carpaint" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#86efd7"/><stop offset="1" stop-color="#27b69e"/></linearGradient><linearGradient id="glass" x1="0" x2="1"><stop offset="0" stop-color="#1c5870"/><stop offset="1" stop-color="#092d48"/></linearGradient></defs>
+              <ellipse cx="251" cy="237" rx="199" ry="26" fill="#07263a" opacity=".8"/>
+              <path d="M62 163 L109 132 L163 73 Q176 58 198 58 L315 58 Q340 59 359 84 L397 136 L434 152 Q456 160 457 185 L457 214 Q452 225 435 225 L72 225 Q51 221 51 201 L51 184 Q52 171 62 163 Z" fill="url(#carpaint)" stroke="#9af8e3" stroke-width="3"/>
+              <path d="M171 81 L309 81 Q323 82 335 98 L369 142 L119 142 Z" fill="url(#glass)"/>
+              <path d="M230 81 L230 142" stroke="#6cc8cb" stroke-width="6"/>
+              <path d="M113 153 L408 153" stroke="#1b9f8e" stroke-width="3" opacity=".7"/>
+              <path d="M66 176 L103 165 L105 188 L62 191 Z" fill="#f5e0a2"/>
+              <path d="M408 163 L446 175 L444 194 L407 189 Z" fill="#ff8478"/>
+              <circle cx="142" cy="219" r="36" fill="#071b2c" stroke="#173c50" stroke-width="9"/><circle cx="142" cy="219" r="16" fill="#85b4bc"/><circle cx="142" cy="219" r="7" fill="#183f50"/>
+              <circle cx="377" cy="219" r="36" fill="#071b2c" stroke="#173c50" stroke-width="9"/><circle cx="377" cy="219" r="16" fill="#85b4bc"/><circle cx="377" cy="219" r="7" fill="#183f50"/>
+            </svg>
+          </div>
+          <div class="illustration-chip chip-top"><span class="chip-icon">✓</span> Automatsko očitavanje</div>
+          <div class="illustration-chip chip-bottom"><span class="chip-icon parking-icon">P</span> Parking sesija pronađena</div>
+        </div>
+        <div class="helper-information">
+          <div class="helper-icon">i</div>
+          <div><strong>Testno okruženje</strong><span>Ovaj kiosk ne prima stvarni novac, ne kreira fiskalne račune i ne komunicira sa kamerama.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="service-panel" aria-label="Kiosk naplata">
+      <div class="steps-bar" aria-label="Koraci procesa">
+        <div class="step-point" [class.active]="currentStepIndex() >= 0"><span>01</span><small>Registracija</small></div>
+        <div class="step-connector" [class.active]="currentStepIndex() >= 1"></div>
+        <div class="step-point" [class.active]="currentStepIndex() >= 1"><span>02</span><small>Pregled</small></div>
+        <div class="step-connector" [class.active]="currentStepIndex() >= 2"></div>
+        <div class="step-point" [class.active]="currentStepIndex() >= 2"><span>03</span><small>Plaćanje</small></div>
+      </div>
+
+      <section *ngIf="step === 'search'" class="panel-content lookup-panel">
+        <div class="section-heading"><span class="section-kicker">KORAK 01 / 03</span><h2>Pronađite svoje vozilo</h2><p>Unesite registarsku oznaku bez obzira na crtice i razmake.</p></div>
+        <form (ngSubmit)="lookup()" class="lookup-form">
+          <label for="plate-input">REGISTARSKA OZNAKA</label>
+          <div class="plate-field">
+            <span class="plate-country">SRB</span>
+            <input id="plate-input" name="plate" [ngModel]="plateInput" (ngModelChange)="updatePlate($event)" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="12" placeholder="BG123AA" aria-label="Unesite registraciju" />
+            <button type="button" class="field-clear" *ngIf="plateInput" (click)="updatePlate('')" aria-label="Obriši registraciju">×</button>
+          </div>
+          <div class="validation-error" *ngIf="searchError" role="alert">{{searchError}}</div>
+          <button class="primary-action" type="submit" [disabled]="!hasSearch">PRONAĐI VOZILO <span aria-hidden="true">→</span></button>
+        </form>
+        <div class="keyboard-wrap" aria-label="Ekranska tastatura">
+          <div class="keyboard-row" *ngFor="let row of keyboardRows; let idx = index">
+            <button type="button" class="keyboard-key" *ngFor="let key of row" (click)="virtualKey(key)">{{key}}</button>
+            <button type="button" class="keyboard-key keyboard-delete" *ngIf="idx === 3" (click)="backspace()" aria-label="Izbriši poslednji karakter">⌫</button>
+          </div>
+        </div>
+        <div class="examples">
+          <div class="examples-title"><span class="examples-dot"></span> TEST REGISTRACIJE <small>izaberite primer</small></div>
+          <div class="example-chips"><button type="button" *ngFor="let test of quickPlates" (click)="choosePlate(test.plate)"><strong>{{test.plate}}</strong><span>{{test.label}}</span></button></div>
+        </div>
+      </section>
+
+      <section *ngIf="step === 'details' && quote as result" class="panel-content details-panel">
+        <div class="section-heading"><span class="section-kicker">KORAK 02 / 03</span><h2>Pregled parkinga</h2><p>Pronašli smo aktivnu sesiju za vaše vozilo.</p></div>
+        <div class="plate-summary"><div><span>REGISTRACIJA</span><strong>{{result.session.plate}}</strong></div><span class="plate-summary-icon">P</span></div>
+        <div class="detail-list"><div><span>Vreme ulaska</span><strong>{{result.session.entryAt | date:'dd.MM.yyyy · HH:mm'}}</strong></div><div><span>Trajanje parkiranja</span><strong>{{readableDuration}}</strong></div><div><span>Tarifa (demo)</span><strong>100 RSD / započeti sat</strong></div></div>
+        <ng-container [ngSwitch]="result.status">
+          <div class="status-banner green" *ngSwitchCase="'SUBSCRIPTION'"><span class="status-symbol">✓</span><div><strong>AKTIVNA PRETPLATA</strong><span>Važi do {{result.session.subscriptionUntil | date:'dd.MM.yyyy'}}. Plaćanje nije potrebno.</span></div></div>
+          <div class="status-banner green" *ngSwitchCase="'PAID'"><span class="status-symbol">✓</span><div><strong>PARKING JE VEĆ PLAĆEN</strong><span>Evidentirana je uplata u demo podacima.</span></div></div>
+          <div class="status-banner green" *ngSwitchCase="'FREE'"><span class="status-symbol">✓</span><div><strong>BESPLATNO PARKIRANJE</strong><span>Još ste u demonstracionom besplatnom periodu (15 min).</span></div></div>
+        </ng-container>
+        <div class="amount-panel" *ngIf="result.status === 'UNPAID'"><span>UKUPNO ZA PLAĆANJE</span><div><strong>{{result.amountRsd | number:'1.0-0'}}</strong><small>RSD</small></div><p>Prvih 15 minuta besplatno. Nakon toga naplata po započetom satu.</p></div>
+        <button type="button" class="primary-action" *ngIf="result.status === 'UNPAID'" (click)="beginPayment()">NASTAVI NA PLAĆANJE <span aria-hidden="true">→</span></button>
+        <button type="button" class="primary-action" *ngIf="result.status !== 'UNPAID'" (click)="startOver()">ZAVRŠI / NOVA REGISTRACIJA <span aria-hidden="true">→</span></button>
+        <button type="button" class="text-action" (click)="startOver()">← Promeni registraciju</button>
+      </section>
+
+      <section *ngIf="step === 'payment' && quote as result" class="panel-content payment-panel">
+        <div class="section-heading"><span class="section-kicker">KORAK 03 / 03</span><h2>Simulacija gotovinske uplate</h2><p>Dodirnite apoen kako biste simulirali ubacivanje novčanice.</p></div>
+        <div class="payment-box"><div class="payment-box-heading"><div><span>REGISTRACIJA</span><strong>{{result.session.plate}}</strong></div><span class="payment-tag">DEMO</span></div><div class="payment-total"><div><span>Za uplatu</span><strong>{{result.amountRsd | number:'1.0-0'}} <small>RSD</small></strong></div><div><span>Ubačeno (simulacija)</span><strong class="accent-numeric">{{insertedRsd | number:'1.0-0'}} <small>RSD</small></strong></div></div><div class="progress-line"><div [style.width.%]="insertedRsd / result.amountRsd * 100 > 100 ? 100 : insertedRsd / result.amountRsd * 100"></div></div><div class="payment-remaining" *ngIf="remainingRsd > 0">Preostalo: <strong>{{remainingRsd | number:'1.0-0'}} RSD</strong></div><div class="payment-remaining completed" *ngIf="remainingRsd === 0">✓ Unet dovoljan iznos</div></div>
+        <div class="denom-title">IZABERITE NOVČANICU <small>klik za simulaciju</small></div>
+        <div class="banknote-grid"><button type="button" *ngFor="let amount of denominations" [disabled]="canConfirmPayment" (click)="insertNote(amount)" class="banknote"><span class="banknote-mark">DIN</span><strong>{{amount | number:'1.0-0'}}</strong><span>RSD</span></button></div>
+        <div class="payment-explanation"><span class="warning-dot">!</span><div>Novčanica veća od preostalog iznosa neće biti prihvaćena automatski. Najpre birate pretplatu (ako postoji odgovarajući paket) ili povraćaj prepoznate novčanice.</div></div>
+        <div class="payment-actions"><button class="secondary-action" type="button" [disabled]="insertedNotes.length===0" (click)="undoNote()">↶ Ukloni poslednju</button><button class="primary-action" type="button" [disabled]="!canConfirmPayment" (click)="confirmPayment()">POTVRDI DEMO UPLATU <span aria-hidden="true">✓</span></button></div>
+        <button class="text-action" type="button" (click)="cancelPayment()">← Odustani od simulacije uplate</button>
+      </section>
+
+      <section *ngIf="step === 'note-choice' && quote as result" class="panel-content note-choice-panel">
+        <div class="section-heading"><span class="section-kicker">NOVČANICA PREPOZNATA · DEMO ESCROW</span><h2>Šta želite da uradite?</h2><p>Uređaj je prepoznao novčanicu, ali je još nije konačno prihvatio.</p></div>
+        <div class="escrow-note"><span>PREPOZNATA NOVČANICA</span><strong>{{pendingNoteRsd | number:'1.0-0'}} <small>RSD</small></strong><em>Čeka odluku korisnika</em></div>
+        <div class="detail-list"><div><span>Registracija</span><strong>{{result.session.plate}}</strong></div><div><span>Parking za uplatu</span><strong>{{result.amountRsd | number:'1.0-0'}} RSD</strong></div><div><span>Prethodno prihvaćeno</span><strong>{{insertedRsd | number:'1.0-0'}} RSD</strong></div></div>
+        <div class="subscription-offer" *ngIf="canOfferSubscription">
+          <span class="offer-kicker">UMESTO JEDNOKRATNOG PARKIRANJA</span>
+          <h3>Želite li pretplatu za 200 RSD?</h3>
+          <p>Ovo je <strong>demonstraciona jednodnevna pretplata</strong>. Konačne vrste, cene i trajanje pretplata definisaćemo u cenovniku parkinga.</p>
+          <button type="button" class="primary-action" (click)="activateSubscription()">DA, AKTIVIRAJ PRETPLATU ZA 200 RSD <span aria-hidden="true">→</span></button>
+        </div>
+        <div class="payment-explanation" *ngIf="!canOfferSubscription"><span class="warning-dot">!</span><div>Za ovu novčanicu nema odgovarajućeg demo paketa pretplate. Izaberite povraćaj novčanice i ubacite odgovarajući apoen.</div></div>
+        <button type="button" class="return-note-action" (click)="returnPendingNote()">↩ VRATI NOVČANICU OD {{pendingNoteRsd | number:'1.0-0'}} RSD</button>
+        <div class="escrow-warning">Stvaran povraćaj bez isplate kusura zahteva validator novčanica sa podrškom za escrow i komandu za povraćaj pre slaganja novčanice u kasetu.</div>
+      </section>
+
+      <section *ngIf="step === 'completed' && quote as result" class="panel-content done-panel">
+        <div class="success-ring"><span>✓</span></div>
+        <span class="section-kicker">USPEŠNA SIMULACIJA</span>
+        <h2>{{paymentKind === 'subscription' ? 'Pretplata je aktivirana!' : 'Parking je plaćen!'}}</h2>
+        <p>Demo uplata je evidentirana samo u ovom browseru. Nije primljen stvaran novac.</p>
+        <div class="receipt"><div><span>Vrsta demo uplate</span><strong>{{paymentKind === 'subscription' ? 'Jednodnevna pretplata' : 'Parking'}}</strong></div><div><span>Registracija</span><strong>{{result.session.plate}}</strong></div><div><span>Iznos</span><strong>{{(paymentKind === 'subscription' ? subscriptionPriceRsd : result.amountRsd) | number:'1.0-0'}} RSD</strong></div><div><span>Ubačeno (simulirano)</span><strong>{{insertedRsd | number:'1.0-0'}} RSD</strong></div><div><span>Simulirani kusur</span><strong>{{changeRsd | number:'1.0-0'}} RSD</strong></div><div *ngIf="paymentKind === 'subscription'"><span>Pretplata važi do</span><strong>{{subscriptionExpiry | date:'dd.MM.yyyy HH:mm'}}</strong></div><div><span>Vreme simulacije</span><strong>{{paymentTime | date:'dd.MM.yyyy HH:mm'}}</strong></div></div>
+        <button type="button" class="primary-action" (click)="startOver()">NOVA REGISTRACIJA <span aria-hidden="true">→</span></button>
+        <span class="receipt-footnote">Ovo nije fiskalni račun niti dokaz o izvršenoj uplati.</span>
+      </section>
+
+      <footer class="service-footer"><span>ParkPoint · Kiosk 01</span><button type="button" class="reset-demo" (click)="resetDemo()" title="Vrati početne demo podatke">↺ Reset demo podataka</button></footer>
+    </section>
+  </main>
+  <div class="bottom-watermark">KONCEPT DEMONSTRACIJA · BEZ STVARNIH TRANSAKCIJA</div>
+</div>
