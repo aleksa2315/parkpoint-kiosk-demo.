@@ -1,0 +1,55 @@
+name: Deploy ParkPoint kiosk to GitHub Pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Angular dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build for this GitHub Pages URL
+        shell: bash
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          if [[ "$REPO_NAME" == *.github.io ]]; then
+            BASE_HREF="/"
+          else
+            BASE_HREF="/${REPO_NAME}/"
+          fi
+          npm run build -- --base-href "$BASE_HREF"
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site files
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/parking-kiosk-demo/browser
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Publish site
+        id: deployment
+        uses: actions/deploy-pages@v4
